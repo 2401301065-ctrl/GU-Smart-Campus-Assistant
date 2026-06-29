@@ -8,11 +8,11 @@ def get_llm():
     if not api_key:
         raise ValueError("GOOGLE_API_KEY is missing in environment variables")
 
+    # Nayi keys ke liye directly api_key parameter strictly pass karna safe rehta hai
     llm = ChatGoogleGenerativeAI(
         model="gemini-1.5-flash",
-        google_api_key=api_key,
+        api_key=api_key,  # google_api_key ki jagah standard api_key keyword use karein
         temperature=0.3,
-        # Yeh line add karni hai taaki global endpoint se connect ho sake:
         client_options={"api_endpoint": "https://generativelanguage.googleapis.com"}
     )
     return llm
