@@ -49,20 +49,18 @@ if st.button("Ask"):
         )
 
         chain = prompt | llm
+# Naye Google GenAI SDK ke hissaab se direct call:
+client = get_llm()
+prompt_template = get_prompt()
 
-        response = chain.invoke(
-            {
-                "context": context,
-                "question": question
-            }
-        )
+# Context aur Question ko prompt ke andar fill karna
+formatted_prompt = prompt_template.format(context=retrieved_docs, question=user_query)
 
-        st.subheader("Answer")
+# Gemini se answer lena (Bina kisi authentication error ke)
+response_data = client.models.generate_content(
+    model='gemini-1.5-flash',
+    contents=formatted_prompt,
+)
+response = response_data.text
 
-        st.write(response.content)
-
-        st.subheader("Retrieved Sources")
-
-        for i, doc in enumerate(docs, 1):
-            st.markdown(f"### Source {i}")
-            st.write(doc.page_content[:400])
+    
