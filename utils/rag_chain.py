@@ -6,32 +6,16 @@ from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv()
 
-
 def get_llm():
+    api_key = os.getenv("GOOGLE_API_KEY")
+
+    print("API Key exists:", api_key is not None)
+    print("API Key length:", len(api_key) if api_key else 0)
+
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
-        google_api_key=os.getenv("GOOGLE_API_KEY"),
-        temperature=0.3
+        google_api_key=api_key,
+        temperature=0.3,
     )
+
     return llm
-
-
-def get_prompt():
-    prompt = ChatPromptTemplate.from_template(
-        """
-You are Geeta University's official AI Assistant.
-
-Answer ONLY using the provided context.
-
-If the answer is not present in the context, reply:
-"I couldn't find that information in the university documents."
-
-Context:
-{context}
-
-Question:
-{question}
-"""
-    )
-
-    return prompt
