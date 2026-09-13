@@ -1,27 +1,52 @@
 import os
-from google import genai
-from google.genai import types
+from dotenv import load_dotenv
+
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import ChatPromptTemplate
+
+# Load environment variables from .env
+load_dotenv()
+print("API:", os.getenv("GOOGLE_API_KEY"))
+
 
 def get_llm():
     api_key = os.getenv("GOOGLE_API_KEY")
+
     if not api_key:
-        raise ValueError("GOOGLE_API_KEY is missing in environment variables")
-    
-    # Nayi 'aq...' wali keys ke liye official naya Client use hota hai
-    client = genai.Client(api_key=api_key)
-    return client
+        raise ValueError(
+            "GOOGLE_API_KEY is missing. Please add it to your .env file "
+            "or Streamlit Secrets if deploying."
+        )
+
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-1.5-flash",
+        google_api_key=api_key,
+        temperature=0.3,
+    )
+
+    return llm
+
 
 def get_prompt():
-    # Hum prompt ko string format mein return karenge jo naye SDK ke sath perfectly chalega
-    template = """You are an intelligent campus assistant for Geeta University. 
-    Use the provided piece of context to answer the student's question honestly and clearly.
-    If you don't know the answer, say that you don't know.
+    prompt = ChatPromptTemplate.from_template("""
+You are Geeta University Assistant AI.
 
-    Context:
-    {context}
+You are a helpful AI assistant for Geeta University.
 
-    Question: 
-    {question}
+Rules:
+1. Answer ONLY using the provided context.
+2. If the answer is not available in the context, reply:
+   "I couldn't find that information in the university knowledge base."
+3. Be polite, concise, and accurate.
+4. Format answers neatly using bullet points whenever appropriate.
 
-    Helpful Answer:"""
-    return template
+Context:
+{context}
+
+Question:
+{question}
+
+Answer:
+""")
+
+    return prompt

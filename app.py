@@ -7,60 +7,103 @@ from utils.vectorstore import create_vectorstore
 from utils.retriever import get_retriever
 from utils.rag_chain import get_llm, get_prompt
 
+
+# =========================
+# PAGE CONFIGURATION
+# =========================
+
 st.set_page_config(
     page_title="Geeta University AI Assistant",
     page_icon="🎓",
     layout="wide"
 )
 
+
+# =========================
+# TITLE
+# =========================
+
 st.title("🎓 Geeta University AI Assistant")
 st.write("Ask anything about Geeta University!")
 
-# Load everything only once
+
+# =========================
+# INITIALIZE RAG SYSTEM
+# =========================
+
 @st.cache_resource
 def initialize():
+
+    # Load PDF/document files
     documents = load_documents()
+
+    # Split documents into smaller chunks
     chunks = split_documents(documents)
+
+    # Create embeddings
     embeddings = get_embeddings()
 
-    # Create vector DB if needed
+    # Create/update vector database
     create_vectorstore(chunks, embeddings)
 
+    # Create retriever
     retriever = get_retriever(embeddings)
 
+    # Get LLM
     llm = get_llm()
 
+    # Get prompt
     prompt = get_prompt()
 
     return retriever, llm, prompt
 
+
+# Initialize the complete system
 retriever, llm, prompt = initialize()
 
-question = st.text_input("Ask your question")
+
+# =========================
+# USER INPUT
+# =========================
+
+question = st.text_input(
+    "Ask your question",
+    placeholder="e.g. What is the admission process at Geeta University?"
+)
+
+
+# =========================
+# ASK BUTTON
+# =========================
 
 if st.button("Ask"):
 
     if question:
 
+        # Retrieve relevant documents
         docs = retriever.invoke(question)
 
+        # Combine retrieved document content
         context = "\n\n".join(
             [doc.page_content for doc in docs]
         )
 
-        chain = prompt | llm
-# Naye Google GenAI SDK ke hissaab se direct call:
-client = get_llm()
-prompt_template = get_prompt()
+        # Create final prompt
+        formatted_prompt = prompt.format(
+            context=context,
+            question=question
+        )
 
-# Context aur Question ko prompt ke andar fill karna
-formatted_prompt = prompt_template.format(context=retrieved_docs, question=user_query)
+        # Generate answer using the configured LLM
+        response = llm.invoke(formatted_prompt)
 
-# Gemini se answer lena (Bina kisi authentication error ke)
-response_data = client.models.generate_content(
-    model='gemini-1.5-flash',
-    contents=formatted_prompt,
-)
-response = response_data.text
+        # Display answer
+        st.subheader("Answer")
 
-    
+        if hasattr(response, "content"):
+            st.write(response.content)
+        else:
+            st.write(response)
+
+    else:
+        st.warning("Please enter a question first.")
