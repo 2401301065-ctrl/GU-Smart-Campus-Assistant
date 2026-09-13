@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # Load environment variables from .env
 load_dotenv()
-print("API:", os.getenv("GOOGLE_API_KEY"))
+
 
 
 def get_llm():
@@ -19,7 +19,7 @@ def get_llm():
         )
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model="gemini-2.5-flash",
         google_api_key=api_key,
         temperature=0.3,
     )
