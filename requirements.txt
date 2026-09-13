@@ -1,8 +1,10 @@
 streamlit
 langchain
 langchain-community
+langchain-text-splitters
+langchain-huggingface
+langchain-chroma
 langchain-google-genai>=2.0.0
 google-genai>=0.1.0
 pypdf
-langchain-huggingface
-langchain-chroma
+python-dotenv
